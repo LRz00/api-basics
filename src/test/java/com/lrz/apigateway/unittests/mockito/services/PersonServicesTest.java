@@ -54,9 +54,28 @@ public class PersonServicesTest {
      */
     @Test
     public void testCreate() {
+        Person entity = input.mockEntity(1);
+       
+        Person persisted = entity;
+        persisted.setId(1L);
+        
+        PersonVO vo = input.mockVO(1);
+        
+        vo.setKey(1L);
+        
+        when(repository.save(entity)).thenReturn(persisted);
+        
+        var result = service.create(vo);
+        assertNotNull(result);
+        assertNotNull(result.getKey());
+        assertNotNull(result.getLinks());
 
-        fail("The test case is a prototype.");
-    }
+        assertTrue(result.toString().contains("links: [</api/person/v1/1>;rel=\"self\"]"));
+        assertEquals("Addres Test1", result.getAddress());
+        assertEquals("First Name Test1", result.getFirstName());
+        assertEquals("Last Name Test1", result.getLastName());
+        assertEquals("Female", result.getGender());
+  }
 
     /**
      * Test of findAll method, of class PersonServices.
@@ -93,14 +112,29 @@ public class PersonServicesTest {
      */
     @Test
     public void testUpdate() {
-        System.out.println("update");
-        PersonVO person = null;
-        PersonServices instance = new PersonServices();
-        PersonVO expResult = null;
-        PersonVO result = instance.update(person);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+       Person entity = input.mockEntity(1);
+       entity.setId(1L);
+       
+        Person persisted = entity;
+        persisted.setId(1L);
+        
+        PersonVO vo = input.mockVO(1);
+        
+        vo.setKey(1L);
+       
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        when(repository.save(entity)).thenReturn(persisted);
+        
+        var result = service.update(vo);
+        assertNotNull(result);
+        assertNotNull(result.getKey());
+        assertNotNull(result.getLinks());
+
+        assertTrue(result.toString().contains("links: [</api/person/v1/1>;rel=\"self\"]"));
+        assertEquals("Addres Test1", result.getAddress());
+        assertEquals("First Name Test1", result.getFirstName());
+        assertEquals("Last Name Test1", result.getLastName());
+        assertEquals("Female", result.getGender());
     }
 
     /**
@@ -108,27 +142,15 @@ public class PersonServicesTest {
      */
     @Test
     public void testDelete() {
-        System.out.println("delete");
-        Long id = null;
-        PersonServices instance = new PersonServices();
-        instance.delete(id);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
+       Person entity = input.mockEntity(1);
+        entity.setId(1L);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+
+        service.delete(1L);
+        
     }
 
-    /**
-     * Test of createV2 method, of class PersonServices.
-     */
-    @Test
-    public void testCreateV2() {
-        System.out.println("createV2");
-        PersonVOV2 person = null;
-        PersonServices instance = new PersonServices();
-        PersonVOV2 expResult = null;
-        PersonVOV2 result = instance.createV2(person);
-        assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
+  
 
 }
