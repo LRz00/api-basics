@@ -6,6 +6,7 @@ package com.lrz.apigateway.unittests.mockito.services;
 
 import com.lrz.apigateway.data.vo.v1.PersonVO;
 import com.lrz.apigateway.data.vo.v2.PersonVOV2;
+import com.lrz.apigateway.exception.RequiredObjectIsNullException;
 import com.lrz.apigateway.model.Person;
 import com.lrz.apigateway.repository.PersonRepository;
 import com.lrz.apigateway.services.PersonServices;
@@ -34,15 +35,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @TestInstance(Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
 public class PersonServicesTest {
-
+    
     MockPerson input;
-
+    
     @InjectMocks
     private PersonServices service;
-
+    
     @Mock
     PersonRepository repository;
-
+    
     @BeforeEach
     void setUpMocks() throws Exception {
         input = new MockPerson();
@@ -55,7 +56,7 @@ public class PersonServicesTest {
     @Test
     public void testCreate() {
         Person entity = input.mockEntity(1);
-       
+        
         Person persisted = entity;
         persisted.setId(1L);
         
@@ -69,20 +70,62 @@ public class PersonServicesTest {
         assertNotNull(result);
         assertNotNull(result.getKey());
         assertNotNull(result.getLinks());
-
+        
         assertTrue(result.toString().contains("links: [</api/person/v1/1>;rel=\"self\"]"));
         assertEquals("Addres Test1", result.getAddress());
         assertEquals("First Name Test1", result.getFirstName());
         assertEquals("Last Name Test1", result.getLastName());
         assertEquals("Female", result.getGender());
-  }
+    }
+
+    @Test
+    public void testCreateWithNullPerson() {
+        Exception exception = assertThrows(RequiredObjectIsNullException.class, () -> {
+            service.create(null);
+        });
+        
+        String expectedMessage = "Null Objects cannot be persisted";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+        
+    }
 
     /**
      * Test of findAll method, of class PersonServices.
      */
     @Test
     public void testFindAll() {
-        fail("The test case is a prototype.");
+       List <Person> list = input.mockEntityList();
+       
+        
+        when(repository.findAll()).thenReturn(list);
+        
+        var people = service.findAll();
+        assertNotNull(people);
+        assertEquals(14, people.size());
+        
+        var personOne = people.get(1);
+        assertNotNull(personOne);
+        assertNotNull(personOne.getKey());
+        assertNotNull(personOne.getLinks());
+        
+        assertTrue(personOne.toString().contains("links: [</api/person/v1/1>;rel=\"self\"]"));
+        assertEquals("Addres Test1", personOne.getAddress());
+        assertEquals("First Name Test1", personOne.getFirstName());
+        assertEquals("Last Name Test1", personOne.getLastName());
+        assertEquals("Female", personOne.getGender());
+        
+        var personFive = people.get(5);
+        assertNotNull(personFive);
+        assertNotNull(personFive.getKey());
+        assertNotNull(personFive.getLinks());
+        
+        assertTrue(personFive.toString().contains("links: [</api/person/v1/5>;rel=\"self\"]"));
+        assertEquals("Addres Test5", personFive.getAddress());
+        assertEquals("First Name Test5", personFive.getFirstName());
+        assertEquals("Last Name Test5", personFive.getLastName());
+        assertEquals("Female", personFive.getGender());
+  
     }
 
     /**
@@ -92,14 +135,14 @@ public class PersonServicesTest {
     public void testFindById() {
         Person entity = input.mockEntity(1);
         entity.setId(1L);
-
+        
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
-
+        
         var result = service.findById(1L);
         assertNotNull(result);
         assertNotNull(result.getKey());
         assertNotNull(result.getLinks());
-
+        
         assertTrue(result.toString().contains("links: [</api/person/v1/1>;rel=\"self\"]"));
         assertEquals("Addres Test1", result.getAddress());
         assertEquals("First Name Test1", result.getFirstName());
@@ -112,16 +155,16 @@ public class PersonServicesTest {
      */
     @Test
     public void testUpdate() {
-       Person entity = input.mockEntity(1);
-       entity.setId(1L);
-       
+        Person entity = input.mockEntity(1);
+        entity.setId(1L);
+        
         Person persisted = entity;
         persisted.setId(1L);
         
         PersonVO vo = input.mockVO(1);
         
         vo.setKey(1L);
-       
+        
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
         when(repository.save(entity)).thenReturn(persisted);
         
@@ -129,12 +172,24 @@ public class PersonServicesTest {
         assertNotNull(result);
         assertNotNull(result.getKey());
         assertNotNull(result.getLinks());
-
+        
         assertTrue(result.toString().contains("links: [</api/person/v1/1>;rel=\"self\"]"));
         assertEquals("Addres Test1", result.getAddress());
         assertEquals("First Name Test1", result.getFirstName());
         assertEquals("Last Name Test1", result.getLastName());
         assertEquals("Female", result.getGender());
+    }
+    
+     @Test
+    public void testUpdateWithNullPerson() {
+        Exception exception = assertThrows(RequiredObjectIsNullException.class, () -> {
+            service.update(null);
+        });
+        
+        String expectedMessage = "Null Objects cannot be persisted";
+        String actualMessage = exception.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+        
     }
 
     /**
@@ -142,15 +197,13 @@ public class PersonServicesTest {
      */
     @Test
     public void testDelete() {
-       Person entity = input.mockEntity(1);
+        Person entity = input.mockEntity(1);
         entity.setId(1L);
-
+        
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
-
+        
         service.delete(1L);
         
     }
-
-  
-
+    
 }

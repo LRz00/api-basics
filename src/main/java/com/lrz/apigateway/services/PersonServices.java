@@ -3,6 +3,7 @@ package com.lrz.apigateway.services;
 import com.lrz.apigateway.controller.PersonController;
 import com.lrz.apigateway.data.vo.v1.PersonVO;
 import com.lrz.apigateway.data.vo.v2.PersonVOV2;
+import com.lrz.apigateway.exception.RequiredObjectIsNullException;
 import java.util.List;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,11 @@ public class PersonServices {
     Logger logger = Logger.getLogger(PersonServices.class.getName());
 
     public PersonVO create(PersonVO person) {
+
+        if (person == null) {
+            throw new RequiredObjectIsNullException();
+        }
+
         logger.info("Creating person");
         var entity = DozerMapper.parseObject(person, Person.class);
         var vo = DozerMapper.parseObject(repository.save(entity), PersonVO.class);
@@ -58,6 +64,10 @@ public class PersonServices {
     }
 
     public PersonVO update(PersonVO person) {
+        if (person == null) {
+            throw new RequiredObjectIsNullException();
+        }
+
         Person entity = repository.findById(person.getKey())
                 .orElseThrow(() -> new ResourceNotFoundException("No records found for this Key"));
 
@@ -73,7 +83,7 @@ public class PersonServices {
     }
 
     public void delete(Long id) {
-         logger.log(Level.INFO, "Deleting person of id:{0}", id.toString());
+        logger.log(Level.INFO, "Deleting person of id:{0}", id.toString());
         Person entity = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID"));
         repository.delete(entity);
