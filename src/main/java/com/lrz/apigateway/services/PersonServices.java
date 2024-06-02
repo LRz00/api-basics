@@ -44,7 +44,7 @@ public class PersonServices {
     }
 
     public List<PersonVO> findAll() {
-        logger.info("Finding all persons");
+        logger.info("Finding all people");
         var persons = DozerMapper.parseListObjects(repository.findAll(), PersonVO.class);
 
         persons.stream()
