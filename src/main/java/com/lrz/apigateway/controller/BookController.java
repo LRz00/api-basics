@@ -30,9 +30,10 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author lara
  */
+
 @RestController
 @RequestMapping("/api/book/v1")
-@Tag(name = "People", description = "Endpoints for Managing Books")
+@Tag(name = "Books", description = "Endpoints for Managing Books")
 public class BookController {
 
     @Autowired
