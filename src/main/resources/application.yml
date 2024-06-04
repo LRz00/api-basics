@@ -1,3 +1,5 @@
+cors:
+  originPatterns: http://localhost:8080,http://localhost:3000,https://lrz.com.br    
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

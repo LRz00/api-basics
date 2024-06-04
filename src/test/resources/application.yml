@@ -1,5 +1,7 @@
 server:
   port: 8888
+cors:
+  originPatterns: http://localhost:8080,http://localhost:3000,https://lrz.com.br    
 
 spring:
   datasource:
