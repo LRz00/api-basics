@@ -4,8 +4,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/udemy?useTimezone=true&serverTimezone=UTC
-    username: 
-    password: 
+    username: lara
+    password: 13182001
   jpa:
     hibernate:
       ddl-auto: none
