@@ -19,32 +19,23 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserServices implements UserDetailsService{
-     @Autowired
-    UserRepository repository;
+	
+	@Autowired
+	UserRepository repository;
+	
+	public UserServices(UserRepository repository) {
+		this.repository = repository;
+	}
 
-    @Autowired
-    PersonMapper mapper;
-
-    Logger logger = Logger.getLogger(UserServices.class.getName());
-    
-    
-    public UserServices(UserRepository repository) {
-        this.repository = repository;
-    }
-
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        logger.info("Finding user by username:" + username);
-        
-        var user = repository.findByUsername(username);
-        
-        if(user!= null){
-            return user;
-        }else{
-            throw new UsernameNotFoundException("Username: " + username + "Not found.");
-        }
-    }
-
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		var user = repository.findByUsername(username);
+		if (user != null) {
+			return user;
+		} else {
+			throw new UsernameNotFoundException("Username " + username + " not found");
+		}
+		
+	}
     
 }

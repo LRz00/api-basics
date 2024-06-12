@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.lrz.apigateway.security.jwt;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,91 +20,85 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author lara
- */
 @Service
 public class JwtTokenProvider {
 
     @Value("${security.jwt.token.secret-key:secret}")
     private String secretKey = "secret";
     @Value("${security.jwt.token.expire-length:3600000}")
-    private long validityInMiliseconds = 3600000; //1 hora
+    private long validityInMilliseconds = 3600000; // 1 hour
 
     @Autowired
     private UserDetailsService userDetailsService;
 
-    Algorithm algorithim = null;
+    private Algorithm algorithm;
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
-        algorithim = Algorithm.HMAC256(secretKey.getBytes());
+        algorithm = Algorithm.HMAC256(secretKey.getBytes());
     }
 
     public TokenVO createAccessToken(String username, List<String> roles) {
         Date now = new Date();
-        Date valid = new Date(now.getTime() + validityInMiliseconds);
-        var accessToken = getAcessToken(username, roles, now, valid);
-        var refreshToken = getRefreshToken(username, roles, now);
+        Date valid = new Date(now.getTime() + validityInMilliseconds);
+        String accessToken = getAccessToken(username, roles, now, valid);
+        String refreshToken = getRefreshToken(username, roles, now);
 
         return new TokenVO(username, true, now, valid, accessToken, refreshToken);
     }
 
-    private String getAcessToken(String username, List<String> roles, Date now, Date valid) {
+    private String getAccessToken(String username, List<String> roles, Date now, Date valid) {
         String issuerUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-        
-       return  JWT.create().withClaim("roles", roles).
-                withIssuedAt(now)
+
+        return JWT.create()
+                .withClaim("roles", roles)
+                .withIssuedAt(now)
                 .withExpiresAt(valid)
                 .withSubject(username)
                 .withIssuer(issuerUrl)
-                .sign(algorithim)
-                .strip();
-
+                .sign(algorithm);
     }
 
-    private String getRefreshToken(String username, List<String> roles, Date now) {
-        Date validRefreshToken = new Date(now.getTime() + validityInMiliseconds * 3); //3 horas
-        
-        return  JWT.create().withClaim("roles", roles).
-                withIssuedAt(now)
+    public String getRefreshToken(String username, List<String> roles, Date now) {
+        Date validRefreshToken = new Date(now.getTime() + validityInMilliseconds * 3); // 3 hours
+
+        return JWT.create()
+                .withClaim("roles", roles)
+                .withIssuedAt(now)
                 .withExpiresAt(validRefreshToken)
                 .withSubject(username)
-                .sign(algorithim)
-                .strip();
+                .sign(algorithm);
     }
-    
-    public Authentication getAuthentication(String token){
+
+    public Authentication getAuthentication(String token) {
         DecodedJWT decodedJwt = decodedToken(token);
-        UserDetails userDetails = this.userDetailsService
-                .loadUserByUsername(decodedJwt.getSubject());
-        
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(decodedJwt.getSubject());
+
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     private DecodedJWT decodedToken(String token) {
-        Algorithm alg = Algorithm.HMAC256(secretKey.getBytes());
-        JWTVerifier verifier = JWT.require(alg).build();
-        DecodedJWT decodedJwt = verifier.verify(token);
-       
-        return decodedJwt;
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        return verifier.verify(token);
     }
-    
-    public String resolveToken(HttpServletRequest req){
+
+    public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
-        if(bearerToken != null && bearerToken.startsWith("Bearer ")){
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring("Bearer ".length());
         }
         return null;
     }
-    
-    public boolean validateToken(String token){
-        DecodedJWT  decodedJwt = decodedToken(token);
-        
+
+    public boolean validateToken(String token) {
         try {
+            DecodedJWT decodedJwt = decodedToken(token);
             if (decodedJwt.getExpiresAt().before(new Date())) {
                 return false;
             }
@@ -118,3 +108,4 @@ public class JwtTokenProvider {
         }
     }
 }
+
