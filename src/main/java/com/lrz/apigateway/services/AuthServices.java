@@ -40,8 +40,7 @@ public class AuthServices {
             if (user != null) {
                 var token = tokenProvider.createAccessToken(username, user.getRoles());
                 var refreshToken = tokenProvider.getRefreshToken(username, user.getRoles(), new Date());
-
-                // Assuming tokenProvider.createAccessToken returns a TokenVO object
+               
                 TokenVO tokenVO = new TokenVO();
                 tokenVO.setUsername(username);
                 tokenVO.setAuthenticated(true);
@@ -57,5 +56,19 @@ public class AuthServices {
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Invalid username/password supplied!");
         }
+    }
+    
+    public ResponseEntity refreshToken(String username, String refreshToken){
+        var user = repository.findByUsername(username);
+        var tokenResponse = new TokenVO();
+        
+        if(user != null){
+            
+            tokenResponse = tokenProvider.refreshToken(refreshToken);
+        }else {
+            throw new UsernameNotFoundException("Username: " +username + " not found");
+        }
+        
+        return ResponseEntity.ok(tokenResponse);
     }
 }
