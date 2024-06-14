@@ -4,12 +4,14 @@
  */
 package com.lrz.apigateway.integrationtests.vo;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Objects;
 /**
  *
  * @author lara
  */
+@XmlRootElement
 public class AccountCredentialsVO implements Serializable{
     private static final long serialVersionUID = 1L;
     
@@ -20,6 +22,10 @@ public class AccountCredentialsVO implements Serializable{
         this.username = username;
         this.password = password;
     }
+
+    public AccountCredentialsVO() {
+    }
+    
 
     public String getUsername() {
         return username;

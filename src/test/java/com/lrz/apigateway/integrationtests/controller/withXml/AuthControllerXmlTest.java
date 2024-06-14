@@ -2,11 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.lrz.apigateway.integrationtests.controller.withJson;
+package com.lrz.apigateway.integrationtests.controller.withXml;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lrz.apigateway.config.TestConfigs;
-import com.lrz.apigateway.integrationtests.testcontainers.AbstractIntegrationTest;
 import com.lrz.apigateway.integrationtests.vo.AccountCredentialsVO;
 import com.lrz.apigateway.integrationtests.vo.TokenVO;
 import static io.restassured.RestAssured.given;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import com.lrz.apigateway.integrationtests.testcontainers.AbstractIntegrationTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
@@ -23,20 +23,19 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class AuthControllerJsonTest extends AbstractIntegrationTest {
-
+public class AuthControllerXmlTest extends AbstractIntegrationTest{
     private static TokenVO tokenVO;
 
     @Test
     @Order(1)
-    public void testSignin() throws JsonProcessingException {
+    public void testSignin(){
         AccountCredentialsVO user = new AccountCredentialsVO("leandro", "admin123");
 
         tokenVO
                 = given()
                         .basePath("auth/signin")
                         .port(TestConfigs.SERVER_PORT)
-                        .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                        .contentType(TestConfigs.CONTENT_TYPE_XML)
                         .body(user)
                         .when().post()
                         .then()
@@ -51,14 +50,14 @@ public class AuthControllerJsonTest extends AbstractIntegrationTest {
 
     @Test
     @Order(2)
-    public void testRefresh() throws JsonProcessingException {
+    public void testRefresh() {
         AccountCredentialsVO user = new AccountCredentialsVO("leandro", "admin123");
 
         var newTokenVO
                 = given()
                         .basePath("auth/refresh")
                         .port(TestConfigs.SERVER_PORT)
-                        .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                        .contentType(TestConfigs.CONTENT_TYPE_XML)
                         .pathParam("username", tokenVO.getUsername())
                         .headers(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + tokenVO.getRefreshToken())
                         .when().put("{username}")
@@ -72,4 +71,5 @@ public class AuthControllerJsonTest extends AbstractIntegrationTest {
         assertNotNull(newTokenVO.getAccessToken());
         assertNotNull(newTokenVO.getRefreshToken());
     }
+    
 }

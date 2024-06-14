@@ -7,11 +7,13 @@ package com.lrz.apigateway.integrationtests.vo;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
-
+import jakarta.xml.bind.annotation.XmlRootElement;
 /**
  *
  * @author lara
  */
+
+@XmlRootElement
 public class TokenVO implements Serializable{
     private static final long serialVersionUID = 1L;
     
