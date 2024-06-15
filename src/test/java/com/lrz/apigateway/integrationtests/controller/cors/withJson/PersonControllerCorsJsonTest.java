@@ -1,8 +1,9 @@
-package com.lrz.apigateway.integrationtests.controller.withJson;
+package com.lrz.apigateway.integrationtests.controller.cors.withJson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lrz.apigateway.config.TestConfigs;
 import com.lrz.apigateway.integrationtests.testcontainers.AbstractIntegrationTest;
 import com.lrz.apigateway.integrationtests.vo.PersonVO;
 import com.lrz.apigateway.config.TestConfigs;
@@ -24,7 +25,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(OrderAnnotation.class)
-public class PersonControllerJsonTest extends AbstractIntegrationTest {
+public class PersonControllerCorsJsonTest extends AbstractIntegrationTest {
 
     private static RequestSpecification specification;
     private static ObjectMapper objectMapper;
@@ -34,6 +35,7 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
     private static void setup() {
         objectMapper = new ObjectMapper();
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
         person = new PersonVO();
     }
 
@@ -71,6 +73,7 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
                 = given()
                         .spec(specification)
                         .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                        .header(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_URL)
                         .body(person)
                         .when().post()
                         .then()
@@ -89,41 +92,31 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         assertNotNull(createdPerson.getGender());
         assertTrue(createdPerson.getId() > 0);
 
-        assertEquals("PedruLino", createdPerson.getAddress());
-        assertEquals("Juan", createdPerson.getFirstName());
-        assertEquals("Mendes", createdPerson.getLastName());
-        assertEquals("boy", createdPerson.getGender());
+        assertEquals("Scotland", createdPerson.getAddress());
+        assertEquals("Ciara", createdPerson.getFirstName());
+        assertEquals("Delaney", createdPerson.getLastName());
+        assertEquals("gal", createdPerson.getGender());
     }
+
     @Test
     @Order(2)
-    public void testUpdate() throws JsonProcessingException {
-        person.setLastName("Rodrigues");
+    public void testCreateWithWrongOrigin() throws JsonProcessingException {
+        mockPerson();
         var content
                 = given()
                         .spec(specification)
                         .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                        .header(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_FAUX_URL)
                         .body(person)
                         .when().post()
                         .then()
-                        .statusCode(200)
+                        .statusCode(403)
                         .extract()
                         .body()
                         .asString();
-        PersonVO createdPerson = objectMapper.readValue(content, PersonVO.class);
 
-        person = createdPerson;
-
-        assertNotNull(createdPerson.getId());
-        assertNotNull(createdPerson.getAddress());
-        assertNotNull(createdPerson.getFirstName());
-        assertNotNull(createdPerson.getLastName());
-        assertNotNull(createdPerson.getGender());
-        assertEquals(person.getId(), createdPerson.getId());
-
-        assertEquals("PedruLino", createdPerson.getAddress());
-        assertEquals("Juan", createdPerson.getFirstName());
-        assertEquals("Rodrigues", createdPerson.getLastName());
-        assertEquals("boy", createdPerson.getGender());
+        assertNotNull(content);
+        assertEquals("Invalid CORS request", content);
     }
 
     @Test
@@ -154,18 +147,39 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         assertNotNull(createdPerson.getGender());
         assertTrue(createdPerson.getId() > 0);
 
-        assertEquals("PedruLino", createdPerson.getAddress());
-        assertEquals("Juan", createdPerson.getFirstName());
-        assertEquals("Rodrigues", createdPerson.getLastName());
-        assertEquals("boy", createdPerson.getGender());
+        assertEquals("Scotland", createdPerson.getAddress());
+        assertEquals("Ciara", createdPerson.getFirstName());
+        assertEquals("Delaney", createdPerson.getLastName());
+        assertEquals("gal", createdPerson.getGender());
     }
 
+    @Test
+    @Order(4)
+    public void testFindByIdWithWrongOrigin() throws JsonProcessingException {
+        mockPerson();
+
+        var content
+                = given()
+                        .spec(specification)
+                        .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                        .header(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_FAUX_URL)
+                        .pathParam("id", person.getId())
+                        .when().get("{id}")
+                        .then()
+                        .statusCode(403)
+                        .extract()
+                        .body()
+                        .asString();
+
+        assertNotNull(content);
+        assertEquals("Invalid CORS request", content);
+    }
 
     private void mockPerson() {
-        person.setFirstName("Juan");
-        person.setLastName("Mendes");
-        person.setAddress("PedruLino");
-        person.setGender("boy");
+        person.setFirstName("Ciara");
+        person.setLastName("Delaney");
+        person.setAddress("Scotland");
+        person.setGender("gal");
     }
 
 }
