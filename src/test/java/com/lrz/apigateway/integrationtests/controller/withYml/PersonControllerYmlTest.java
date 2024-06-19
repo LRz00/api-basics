@@ -1,4 +1,4 @@
-package com.lrz.apigateway.integrationtests.controller.withJson;
+package com.lrz.apigateway.integrationtests.controller.withYml;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -14,11 +14,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static io.restassured.RestAssured.given;
 import io.restassured.builder.RequestSpecBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.lrz.apigateway.integrationtests.controller.withYml.mapper.YmlMapper;
+import io.restassured.config.EncoderConfig;
+import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import java.util.List;
+import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
@@ -27,16 +32,15 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(OrderAnnotation.class)
-public class PersonControllerJsonTest extends AbstractIntegrationTest {
+public class PersonControllerYmlTest extends AbstractIntegrationTest {
 
     private static RequestSpecification specification;
-    private static ObjectMapper objectMapper;
     private static PersonVO person;
+    private static YmlMapper objectMapper;
 
     @BeforeAll
     private static void setup() {
-        objectMapper = new ObjectMapper();
-        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        objectMapper = new YmlMapper();
         person = new PersonVO();
     }
 
@@ -46,17 +50,23 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         AccountCredentialsVO user = new AccountCredentialsVO("leandro", "admin123");
 
         var acessToken
-                = given()
+                = given().config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(
+                                                TestConfigs.CONTENT_TYPE_YML,
+                                                ContentType.TEXT)))
                         .basePath("auth/signin")
                         .port(TestConfigs.SERVER_PORT)
-                        .contentType(TestConfigs.CONTENT_TYPE_JSON)
-                        .body(user)
+                        .contentType(TestConfigs.CONTENT_TYPE_YML)
+                        .body(user, objectMapper)
                         .when().post()
                         .then()
                         .statusCode(200)
                         .extract()
                         .body()
-                        .as(TokenVO.class).getAccessToken();
+                        .as(TokenVO.class, objectMapper).getAccessToken();
 
         specification = new RequestSpecBuilder().addHeader(TestConfigs.HEADER_PARAM_AUTHORIZATION, "Bearer " + acessToken)
                 .setBasePath("/api/person/v1")
@@ -73,15 +83,23 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         var content
                 = given()
                         .spec(specification)
-                        .contentType(TestConfigs.CONTENT_TYPE_JSON)
-                        .body(person)
+                        .config(
+                                RestAssuredConfig
+                                        .config()
+                                        .encoderConfig(EncoderConfig.encoderConfig()
+                                                .encodeContentTypeAs(
+                                                        TestConfigs.CONTENT_TYPE_YML,
+                                                        ContentType.TEXT)))
+                        .contentType(TestConfigs.CONTENT_TYPE_YML)
+                        .body(person, objectMapper)
                         .when().post()
                         .then()
                         .statusCode(200)
                         .extract()
                         .body()
-                        .asString();
-        PersonVO createdPerson = objectMapper.readValue(content, PersonVO.class);
+                        .as(PersonVO.class, objectMapper);
+
+        PersonVO createdPerson = content;
 
         person = createdPerson;
 
@@ -105,15 +123,23 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         var content
                 = given()
                         .spec(specification)
-                        .contentType(TestConfigs.CONTENT_TYPE_JSON)
-                        .body(person)
+                        .config(
+                                RestAssuredConfig
+                                        .config()
+                                        .encoderConfig(EncoderConfig.encoderConfig()
+                                                .encodeContentTypeAs(
+                                                        TestConfigs.CONTENT_TYPE_YML,
+                                                        ContentType.TEXT)))
+                        .contentType(TestConfigs.CONTENT_TYPE_YML)
+                        .body(person, objectMapper)
                         .when().post()
                         .then()
                         .statusCode(200)
                         .extract()
                         .body()
-                        .asString();
-        PersonVO createdPerson = objectMapper.readValue(content, PersonVO.class);
+                        .as(PersonVO.class, objectMapper);
+
+        PersonVO createdPerson = content;
 
         person = createdPerson;
 
@@ -138,7 +164,14 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         var content
                 = given()
                         .spec(specification)
-                        .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                        .config(
+                                RestAssuredConfig
+                                        .config()
+                                        .encoderConfig(EncoderConfig.encoderConfig()
+                                                .encodeContentTypeAs(
+                                                        TestConfigs.CONTENT_TYPE_YML,
+                                                        ContentType.TEXT)))
+                        .contentType(TestConfigs.CONTENT_TYPE_YML)
                         .header(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_URL)
                         .pathParam("id", person.getId())
                         .when().get("{id}")
@@ -146,8 +179,9 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
                         .statusCode(200)
                         .extract()
                         .body()
-                        .asString();
-        PersonVO createdPerson = objectMapper.readValue(content, PersonVO.class);
+                        .as(PersonVO.class, objectMapper);
+
+        PersonVO createdPerson = content;
 
         person = createdPerson;
 
@@ -169,7 +203,14 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
     public void testDelete() throws JsonProcessingException {
         given()
                 .spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(
+                                                TestConfigs.CONTENT_TYPE_YML,
+                                                ContentType.TEXT)))
+                .contentType(TestConfigs.CONTENT_TYPE_YML)
                 .pathParam("id", person.getId())
                 .when().delete("{id}")
                 .then()
@@ -181,17 +222,23 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
     @Order(5)
     public void testFindAll() throws JsonMappingException, JsonProcessingException {
         var content = given().spec(specification)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(
+                                                TestConfigs.CONTENT_TYPE_YML,
+                                                ContentType.TEXT)))
+                .contentType(TestConfigs.CONTENT_TYPE_YML)
                 .when()
                 .get()
                 .then()
                 .statusCode(200)
                 .extract()
                 .body()
-                .asString();
+                .as(PersonVO[].class, objectMapper);
 
-        List<PersonVO> people = objectMapper.readValue(content, new TypeReference<List<PersonVO>>() {
-        });
+        List<PersonVO> people = Arrays.asList(content);
 
         PersonVO foundPersonOne = people.get(0);
 
@@ -235,7 +282,14 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
                 .build();
 
         given().spec(specificationWithoutToken)
-                .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                .config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(
+                                                TestConfigs.CONTENT_TYPE_YML,
+                                                ContentType.TEXT)))
+                .contentType(TestConfigs.CONTENT_TYPE_YML)
                 .when()
                 .get()
                 .then()
