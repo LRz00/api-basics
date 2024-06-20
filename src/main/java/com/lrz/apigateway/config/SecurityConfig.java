@@ -55,7 +55,8 @@ public class SecurityConfig {
                 .addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequest -> authorizeHttpRequest
-                .requestMatchers("/auth/signin", "/api-docs/**", "/swagger-ui.html**"
+                .requestMatchers("/auth/signin", "/api-docs/**", "/swagger-ui.html","/swagger-ui/**", 
+                        "/swagger-resources", "/swagger-resources/**", "v3/api-docs/**"
                 ).permitAll()
                 .requestMatchers("/api/**", "/auth/**").authenticated()
                 .requestMatchers("/users").denyAll())
