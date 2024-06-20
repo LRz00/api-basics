@@ -16,6 +16,7 @@ import com.lrz.apigateway.mapper.DozerMapper;
 import com.lrz.apigateway.mapper.custom.PersonMapper;
 import com.lrz.apigateway.model.Person;
 import com.lrz.apigateway.repository.PersonRepository;
+import jakarta.transaction.Transactional;
 import java.util.logging.Level;
 
 @Service
@@ -79,6 +80,20 @@ public class PersonServices {
         var vo = DozerMapper.parseObject(repository.save(entity), PersonVO.class);
         vo.add(linkTo(methodOn(PersonController.class).findById(vo.getKey())).withSelfRel());
 
+        return vo;
+    }
+
+    @Transactional
+    public PersonVO disablePerson(Long id) {
+        logger.log(Level.INFO, "Disabling person of id:{0}", id.toString());
+
+        repository.disablePerson(id);
+
+        var entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID"));
+        var vo = DozerMapper.parseObject(entity, PersonVO.class);
+
+        vo.add(linkTo(methodOn(PersonController.class).findById(id)).withSelfRel());
         return vo;
     }
 

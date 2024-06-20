@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 @RestController
 @RequestMapping("/api/person/v1")
@@ -33,7 +34,7 @@ public class PersonController {
     private PersonServices service;
 
     @GetMapping(produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.APPLICATION_YML})
-    @Operation(summary = "Find all People.", description = "Find all People.", tags = {"People"},
+    @Operation(summary = "Finds all People.", description = "Finds all People.", tags = {"People"},
             responses = {
                 @ApiResponse(description = "Success", responseCode = "200", content = {
             @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PersonVO.class)))}),
@@ -45,10 +46,9 @@ public class PersonController {
         return service.findAll();
     }
 
-
     @GetMapping(value = "/{id}",
             produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.APPLICATION_YML})
-    @Operation(summary = "Finds a Person.", description = "Finds a Person.", tags = {"People"},
+    @Operation(summary = "Finds a Person based on a id.", description = "Finds a Person based on a id.", tags = {"People"},
             responses = {
                 @ApiResponse(description = "Success", responseCode = "200", content
                         = @Content(schema = @Schema(implementation = PersonVO.class))),
@@ -86,6 +86,21 @@ public class PersonController {
                 @ApiResponse(description = "Internal Error", responseCode = "500", content = @Content),})
     public PersonVO update(@RequestBody PersonVO person) {
         return service.update(person);
+    }
+
+    @PatchMapping(value = "/{id}",
+            produces = {MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.APPLICATION_YML})
+    @Operation(summary = "Disables a Person by id", description = "Disables a Person by id.", tags = {"People"},
+            responses = {
+                @ApiResponse(description = "Success", responseCode = "200", content
+                        = @Content(schema = @Schema(implementation = PersonVO.class))),
+                @ApiResponse(description = "No Content", responseCode = "204", content = @Content),
+                @ApiResponse(description = "Bad Request", responseCode = "400", content = @Content),
+                @ApiResponse(description = "Unauthorized", responseCode = "401", content = @Content),
+                @ApiResponse(description = "Not Found", responseCode = "404", content = @Content),
+                @ApiResponse(description = "Internal Error", responseCode = "500", content = @Content),})
+    public PersonVO DisablePerson(@PathVariable("id") Long id) {
+        return service.disablePerson(id);
     }
 
     @DeleteMapping("/{id}")
