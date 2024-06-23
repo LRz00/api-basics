@@ -91,6 +91,7 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         assertNotNull(createdPerson.getLastName());
         assertNotNull(createdPerson.getGender());
         assertTrue(createdPerson.getId() > 0);
+        assertTrue(createdPerson.getEnabled());
 
         assertEquals("PedruLino", createdPerson.getAddress());
         assertEquals("Juan", createdPerson.getFirstName());
@@ -123,6 +124,7 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         assertNotNull(createdPerson.getLastName());
         assertNotNull(createdPerson.getGender());
         assertEquals(person.getId(), createdPerson.getId());
+        assertTrue(createdPerson.getEnabled());
 
         assertEquals("PedruLino", createdPerson.getAddress());
         assertEquals("Juan", createdPerson.getFirstName());
@@ -157,6 +159,7 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
         assertNotNull(createdPerson.getLastName());
         assertNotNull(createdPerson.getGender());
         assertTrue(createdPerson.getId() > 0);
+        assertTrue(createdPerson.getEnabled());
 
         assertEquals("PedruLino", createdPerson.getAddress());
         assertEquals("Juan", createdPerson.getFirstName());
@@ -241,12 +244,46 @@ public class PersonControllerJsonTest extends AbstractIntegrationTest {
                 .then()
                 .statusCode(403);
     }
+    
+    @Test
+    @Order(7)
+    public void testDisableById() throws JsonProcessingException {     
+        var content
+                = given()
+                        .spec(specification)
+                        .contentType(TestConfigs.CONTENT_TYPE_JSON)
+                        .header(TestConfigs.HEADER_PARAM_ORIGIN, TestConfigs.ORIGIN_URL)
+                        .pathParam("id", person.getId())
+                        .when().patch("{id}")
+                        .then()
+                        .statusCode(200)
+                        .extract()
+                        .body()
+                        .asString();
+        PersonVO createdPerson = objectMapper.readValue(content, PersonVO.class);
+
+        person = createdPerson;
+
+        assertNotNull(createdPerson.getId());
+        assertNotNull(createdPerson.getAddress());
+        assertNotNull(createdPerson.getFirstName());
+        assertNotNull(createdPerson.getLastName());
+        assertNotNull(createdPerson.getGender());
+        assertFalse(createdPerson.getEnabled());
+        assertTrue(createdPerson.getId() > 0);
+
+        assertEquals("PedruLino", createdPerson.getAddress());
+        assertEquals("Juan", createdPerson.getFirstName());
+        assertEquals("Rodrigues", createdPerson.getLastName());
+        assertEquals("boy", createdPerson.getGender());
+    }
 
     private void mockPerson() {
         person.setFirstName("Juan");
         person.setLastName("Mendes");
         person.setAddress("PedruLino");
         person.setGender("boy");
+        person.setEnabled(true);
     }
 
 }

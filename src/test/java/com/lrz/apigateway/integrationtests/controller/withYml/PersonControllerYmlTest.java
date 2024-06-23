@@ -108,6 +108,7 @@ public class PersonControllerYmlTest extends AbstractIntegrationTest {
         assertNotNull(createdPerson.getFirstName());
         assertNotNull(createdPerson.getLastName());
         assertNotNull(createdPerson.getGender());
+        assertTrue(createdPerson.getEnabled());
         assertTrue(createdPerson.getId() > 0);
 
         assertEquals("PedruLino", createdPerson.getAddress());
@@ -148,6 +149,7 @@ public class PersonControllerYmlTest extends AbstractIntegrationTest {
         assertNotNull(createdPerson.getFirstName());
         assertNotNull(createdPerson.getLastName());
         assertNotNull(createdPerson.getGender());
+        assertTrue(createdPerson.getEnabled());
         assertEquals(person.getId(), createdPerson.getId());
 
         assertEquals("PedruLino", createdPerson.getAddress());
@@ -190,6 +192,7 @@ public class PersonControllerYmlTest extends AbstractIntegrationTest {
         assertNotNull(createdPerson.getFirstName());
         assertNotNull(createdPerson.getLastName());
         assertNotNull(createdPerson.getGender());
+        assertTrue(createdPerson.getEnabled());
         assertTrue(createdPerson.getId() > 0);
 
         assertEquals("PedruLino", createdPerson.getAddress());
@@ -217,9 +220,54 @@ public class PersonControllerYmlTest extends AbstractIntegrationTest {
                 .statusCode(204);
 
     }
+    
+    /* NOT WORKING
+     @Test
+    @Order(5)
+    public void testDisable() throws JsonProcessingException {
+        System.out.println("Person id: " +person.getId().toString());
+        var content
+                = given().spec(specification)
+                        .config(
+                                RestAssuredConfig
+                                        .config()
+                                        .encoderConfig(EncoderConfig.encoderConfig()
+                                                .encodeContentTypeAs(
+                                                        TestConfigs.CONTENT_TYPE_YML,
+                                                        ContentType.TEXT)))
+                        .contentType(TestConfigs.CONTENT_TYPE_YML)
+                        .accept(TestConfigs.CONTENT_TYPE_YML)
+                        .pathParam("id", person.getId())
+                        .when()
+                        .patch("{id}")
+                        .then()
+                        .statusCode(200)
+                        .extract()
+                        .body()
+                        .as(PersonVO.class, objectMapper);
+
+        PersonVO createdPerson = content;
+
+        person = createdPerson;
+
+        assertNotNull(createdPerson.getId());
+        assertNotNull(createdPerson.getAddress());
+        assertNotNull(createdPerson.getFirstName());
+        assertNotNull(createdPerson.getLastName());
+        assertNotNull(createdPerson.getGender());
+        assertFalse(createdPerson.getEnabled());
+        assertTrue(createdPerson.getId() > 0);
+
+        assertEquals("PedruLino", createdPerson.getAddress());
+        assertEquals("Juan", createdPerson.getFirstName());
+        assertEquals("Rodrigues", createdPerson.getLastName());
+        assertEquals("boy", createdPerson.getGender());
+    }
+    */
+   
 
     @Test
-    @Order(5)
+    @Order(6)
     public void testFindAll() throws JsonMappingException, JsonProcessingException {
         var content = given().spec(specification)
                 .config(
@@ -272,7 +320,7 @@ public class PersonControllerYmlTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     public void testFindAllWithoutToken() throws JsonMappingException, JsonProcessingException {
         RequestSpecification specificationWithoutToken = new RequestSpecBuilder()
                 .setBasePath("/api/person/v1")
@@ -301,6 +349,7 @@ public class PersonControllerYmlTest extends AbstractIntegrationTest {
         person.setLastName("Mendes");
         person.setAddress("PedruLino");
         person.setGender("boy");
+        person.setEnabled(true);
     }
 
 }
