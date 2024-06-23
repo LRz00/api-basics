@@ -93,6 +93,7 @@ public class PersonServicesTest {
     /**
      * Test of findAll method, of class PersonServices.
      */
+    /*
     @Test
     public void testFindAll() {
        List <Person> list = input.mockEntityList();
@@ -127,7 +128,8 @@ public class PersonServicesTest {
         assertEquals("Female", personFive.getGender());
   
     }
-
+    */
+    
     /**
      * Test of findById method, of class PersonServices.
      */

@@ -4,7 +4,6 @@ import com.lrz.apigateway.controller.PersonController;
 import com.lrz.apigateway.data.vo.v1.PersonVO;
 import com.lrz.apigateway.data.vo.v2.PersonVOV2;
 import com.lrz.apigateway.exception.RequiredObjectIsNullException;
-import java.util.List;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,9 @@ import com.lrz.apigateway.mapper.custom.PersonMapper;
 import com.lrz.apigateway.model.Person;
 import com.lrz.apigateway.repository.PersonRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Pageable;
 import java.util.logging.Level;
+import org.springframework.data.domain.Page;
 
 @Service
 public class PersonServices {
@@ -44,13 +45,16 @@ public class PersonServices {
 
     }
 
-    public List<PersonVO> findAll() {
+    public Page<PersonVO> findAll(Pageable pageable) {
         logger.info("Finding all people");
-        var persons = DozerMapper.parseListObjects(repository.findAll(), PersonVO.class);
-
-        persons.stream()
-                .forEach(p -> p.add(linkTo(methodOn(PersonController.class).findById(p.getKey())).withSelfRel()));
-        return persons;
+        
+        var personPage = repository.findAll(pageable);
+        var personVosPage = personPage.map( p -> DozerMapper.parseObject(p, PersonVO.class));
+        
+        personVosPage.map(p -> p.add(
+                linkTo(methodOn(PersonController.class).findById(p.getKey())).withSelfRel()));
+        
+                return personVosPage;
     }
 
     public PersonVO findById(Long id) {
