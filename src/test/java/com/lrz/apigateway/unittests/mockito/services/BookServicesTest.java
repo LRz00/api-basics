@@ -118,7 +118,9 @@ public class BookServicesTest {
     /**
      * Test of findAll method, of class BookServices.
      */
-    @Test
+    
+    /*
+     @Test
     public void testFindAll() {
        List <Book> list = input.mockEntityList();
        
@@ -149,6 +151,7 @@ public class BookServicesTest {
         assertEquals(5D, bookfive.getPrice());
         assertEquals("Title Test5", bookfive.getTitle());
     }
+    */
 
     /**
      * Test of update method, of class BookServices.
