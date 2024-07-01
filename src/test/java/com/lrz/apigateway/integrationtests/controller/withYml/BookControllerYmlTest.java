@@ -13,6 +13,7 @@ import com.lrz.apigateway.integrationtests.testcontainers.AbstractIntegrationTes
 import com.lrz.apigateway.integrationtests.vo.AccountCredentialsVO;
 import com.lrz.apigateway.integrationtests.vo.BookVO;
 import com.lrz.apigateway.integrationtests.vo.TokenVO;
+import com.lrz.apigateway.integrationtests.vo.pagedmodels.PagedModelBook;
 import static io.restassured.RestAssured.given;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.config.EncoderConfig;
@@ -183,7 +184,7 @@ public class BookControllerYmlTest extends AbstractIntegrationTest {
                         .extract()
                         .body()
                         .as(BookVO.class, objectMapper);
-        
+
         BookVO createdBook = content;
 
         book = createdBook;
@@ -204,12 +205,12 @@ public class BookControllerYmlTest extends AbstractIntegrationTest {
     public void testDelete() throws JsonProcessingException {
         given()
                 .spec(specification).config(
-                                RestAssuredConfig
-                                        .config()
-                                        .encoderConfig(EncoderConfig.encoderConfig()
-                                                .encodeContentTypeAs(
-                                                        TestConfigs.CONTENT_TYPE_YML,
-                                                        ContentType.TEXT)))
+                RestAssuredConfig
+                        .config()
+                        .encoderConfig(EncoderConfig.encoderConfig()
+                                .encodeContentTypeAs(
+                                        TestConfigs.CONTENT_TYPE_YML,
+                                        ContentType.TEXT)))
                 .contentType(TestConfigs.CONTENT_TYPE_YML)
                 .pathParam("id", book.getId())
                 .when().delete("{id}")
@@ -221,23 +222,26 @@ public class BookControllerYmlTest extends AbstractIntegrationTest {
     @Test
     @Order(5)
     public void testFindAll() throws JsonMappingException, JsonProcessingException {
-        var content = given().spec(specification).config(
-                                RestAssuredConfig
-                                        .config()
-                                        .encoderConfig(EncoderConfig.encoderConfig()
-                                                .encodeContentTypeAs(
-                                                        TestConfigs.CONTENT_TYPE_YML,
-                                                        ContentType.TEXT)))
+        var content = given().spec(specification)
+                .config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(
+                                                TestConfigs.CONTENT_TYPE_YML,
+                                                ContentType.TEXT)))
                 .contentType(TestConfigs.CONTENT_TYPE_YML)
+                .accept(TestConfigs.CONTENT_TYPE_YML)
+                .queryParams("page", 0, "size", 10, "direction", "asc")
                 .when()
                 .get()
                 .then()
                 .statusCode(200)
                 .extract()
                 .body()
-                .as(BookVO[].class, objectMapper);
+                .as(PagedModelBook.class, objectMapper);
 
-        List<BookVO> books = Arrays.asList(content);
+        var books = content.getContent();
 
         BookVO foundBookOne = books.get(0);
 
@@ -247,11 +251,11 @@ public class BookControllerYmlTest extends AbstractIntegrationTest {
         assertNotNull(foundBookOne.getPrice());
         assertNotNull(foundBookOne.getTitle());
 
-        assertEquals(1, foundBookOne.getId());
+        assertEquals(12, foundBookOne.getId());
 
-        assertEquals("Michael C. Feathers", foundBookOne.getAuthor());
-        assertEquals("Working effectively with legacy code", foundBookOne.getTitle());
-        assertEquals(49.00, foundBookOne.getPrice());
+        assertEquals("Viktor Mayer-Schonberger e Kenneth Kukier", foundBookOne.getAuthor());
+        assertEquals("Big Data: como extrair volume, variedade, velocidade e valor da avalanche de informação cotidiana", foundBookOne.getTitle());
+        assertEquals(54.0, foundBookOne.getPrice());
 
         BookVO foundBookFive = books.get(4);
 
@@ -261,11 +265,11 @@ public class BookControllerYmlTest extends AbstractIntegrationTest {
         assertNotNull(foundBookFive.getPrice());
         assertNotNull(foundBookFive.getTitle());
 
-        assertEquals(5, foundBookFive.getId());
+        assertEquals(8, foundBookFive.getId());
 
-        assertEquals("Steve McConnell", foundBookFive.getAuthor());
-        assertEquals("Code complete", foundBookFive.getTitle());
-        assertEquals(58.00, foundBookFive.getPrice());
+        assertEquals("Eric Evans", foundBookFive.getAuthor());
+        assertEquals("Domain Driven Design", foundBookFive.getTitle());
+        assertEquals(92.0, foundBookFive.getPrice());
     }
 
     @Test
@@ -284,6 +288,44 @@ public class BookControllerYmlTest extends AbstractIntegrationTest {
                 .get()
                 .then()
                 .statusCode(403);
+    }
+
+    @Test
+    @Order(7)
+    public void testHATEOAS() throws JsonMappingException, JsonProcessingException {
+
+        var unthreatedContent = given().spec(specification)
+                .config(
+                        RestAssuredConfig
+                                .config()
+                                .encoderConfig(EncoderConfig.encoderConfig()
+                                        .encodeContentTypeAs(
+                                                TestConfigs.CONTENT_TYPE_YML,
+                                                ContentType.TEXT)))
+                .contentType(TestConfigs.CONTENT_TYPE_YML)
+                .accept(TestConfigs.CONTENT_TYPE_YML)
+                .queryParams("page", 0, "size", 12, "direction", "asc")
+                .when()
+                .get()
+                .then()
+                .statusCode(200)
+                .extract()
+                .body()
+                .asString();
+
+        var content = unthreatedContent.replace("\n", "").replace("\r", "");
+
+        assertTrue(content.contains("rel: \"self\"    href: \"http://localhost:8888/api/book/v1/3\""));
+        assertTrue(content.contains("rel: \"self\"    href: \"http://localhost:8888/api/book/v1/5\""));
+        assertTrue(content.contains("rel: \"self\"    href: \"http://localhost:8888/api/book/v1/7\""));
+
+        assertTrue(content.contains("rel: \"first\"  href: \"http://localhost:8888/api/book/v1?direction=asc&page=0&size=12&sort=title,asc\""));
+        assertTrue(content.contains("rel: \"self\"  href: \"http://localhost:8888/api/book/v1?page=0&size=12&direction=asc\""));
+        assertTrue(content.contains("rel: \"next\"  href: \"http://localhost:8888/api/book/v1?direction=asc&page=1&size=12&sort=title,asc\""));
+        assertTrue(content.contains("rel: \"last\"  href: \"http://localhost:8888/api/book/v1?direction=asc&page=1&size=12&sort=title,asc\""));
+
+        assertTrue(content.contains("page:  size: 12  totalElements: 15  totalPages: 2  number: 0"));
+
     }
 
     private void mockBook() {

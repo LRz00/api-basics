@@ -5,7 +5,6 @@
 package com.lrz.apigateway.unittests.mockito.services;
 
 import com.lrz.apigateway.data.vo.v1.PersonVO;
-import com.lrz.apigateway.data.vo.v2.PersonVOV2;
 import com.lrz.apigateway.exception.RequiredObjectIsNullException;
 import com.lrz.apigateway.model.Person;
 import com.lrz.apigateway.repository.PersonRepository;
@@ -15,7 +14,6 @@ import com.lrz.apigateway.unittests.mapper.mocks.MockPerson;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -89,47 +87,6 @@ public class PersonServicesTest {
         assertTrue(actualMessage.contains(expectedMessage));
         
     }
-
-    /**
-     * Test of findAll method, of class PersonServices.
-     */
-    /*
-    @Test
-    public void testFindAll() {
-       List <Person> list = input.mockEntityList();
-       
-        
-        when(repository.findAll()).thenReturn(list);
-        
-        var people = service.findAll();
-        assertNotNull(people);
-        assertEquals(14, people.size());
-        
-        var personOne = people.get(1);
-        assertNotNull(personOne);
-        assertNotNull(personOne.getKey());
-        assertNotNull(personOne.getLinks());
-        
-        assertTrue(personOne.toString().contains("links: [</api/person/v1/1>;rel=\"self\"]"));
-        assertEquals("Addres Test1", personOne.getAddress());
-        assertEquals("First Name Test1", personOne.getFirstName());
-        assertEquals("Last Name Test1", personOne.getLastName());
-        assertEquals("Female", personOne.getGender());
-        
-        var personFive = people.get(5);
-        assertNotNull(personFive);
-        assertNotNull(personFive.getKey());
-        assertNotNull(personFive.getLinks());
-        
-        assertTrue(personFive.toString().contains("links: [</api/person/v1/5>;rel=\"self\"]"));
-        assertEquals("Addres Test5", personFive.getAddress());
-        assertEquals("First Name Test5", personFive.getFirstName());
-        assertEquals("Last Name Test5", personFive.getLastName());
-        assertEquals("Female", personFive.getGender());
-  
-    }
-    */
-    
     /**
      * Test of findById method, of class PersonServices.
      */
