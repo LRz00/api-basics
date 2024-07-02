@@ -1,7 +1,9 @@
 server:
   port: 8888
 cors:
-  originPatterns: http://localhost:8080,http://localhost:3000,https://lrz.com.br    
+  originPatterns: http://localhost:8080,http://localhost:3000,https://lrz.com.br   
+file:
+  upload-dir: /home/lara/Documentos/docs  
 security:
   jwt:
     token:
@@ -17,6 +19,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
     show-sql: false
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 215MB
 springdoc:
   pathsToMatch:
     - /auth/**
