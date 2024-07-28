@@ -3,7 +3,7 @@ server:
 cors:
   originPatterns: http://localhost:8080,http://localhost:3000,https://lrz.com.br   
 file:
-  upload-dir: /home/lara/Documentos/docs  
+  upload-dir: /home/runner/work/api-basic/docs  
 security:
   jwt:
     token:
