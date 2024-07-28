@@ -36,9 +36,10 @@ jobs:
 
       - name: Docker Hub Push
         run: |
-          docker tag ${{ secrets.DOCKER_USERNAME }}/api-basics:latest ${{ secrets.DOCKER_USERNAME }}/api-basics:${{ github.run_id }}
-          docker push ${{ secrets.DOCKER_USERNAME }}/api-basics:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/api-basics:${{ github.run_id }}
+          docker tag lrz00/api-gateway:latest ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
+          docker tag lrz00/api-gateway:latest ${{ secrets.DOCKER_USERNAME }}/api-gateway:${{ github.run_id }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:${{ github.run_id }}
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
