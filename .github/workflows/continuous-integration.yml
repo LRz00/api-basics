@@ -26,11 +26,11 @@ jobs:
         distribution: 'adopt'
         cache: maven
     - name: Build with Maven
-      working-directory: ./api-gateway
+      working-directory: ./api-basics
       run: mvn clean package
       
     - name: Build Docker Compose
-      working-directory: ./api-gateway
+      working-directory: ./api-basics
       run: docker compose build
     
     - name: Docker Hub Push
